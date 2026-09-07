@@ -1,281 +1,216 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>西暦・和暦・年齢 変換</title>
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic UI","Yu Gothic",sans-serif;
-      background:#f7f7f7;
-      color:#222;
-      padding:24px;
-    }
-    .wrap{
-      max-width:680px;
-      margin:40px auto;
-    }
-    h1{
-      font-size:24px;
-      margin:0 0 22px;
-    }
-    .card{
-      background:#fff;
-      border:1px solid #ddd;
-      border-radius:14px;
-      padding:22px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 90px 90px;
-      gap:12px;
-    }
-    label{
-      display:block;
-      font-size:13px;
-      color:#666;
-      margin-bottom:6px;
-    }
-    input{
-      width:100%;
-      height:46px;
-      border:1px solid #ccc;
-      border-radius:10px;
-      padding:0 12px;
-      font-size:17px;
-      background:#fff;
-      outline:none;
-    }
-    input:focus{
-      border-color:#f07a24;
-      box-shadow:0 0 0 3px rgba(240,122,36,.10);
-    }
-    .note{
-      margin:10px 0 0;
-      font-size:12px;
-      color:#777;
-      line-height:1.6;
-    }
-    .error{
-      min-height:20px;
-      margin-top:8px;
-      font-size:12px;
-      color:#c62828;
-    }
-    .result{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:18px;
-    }
-    .box{
-      border:1px solid #e2e2e2;
-      border-radius:10px;
-      padding:14px;
-      min-height:88px;
-    }
-    .box .name{
-      font-size:12px;
-      color:#777;
-      margin-bottom:10px;
-    }
-    .box .value{
-      font-size:24px;
-      font-weight:700;
-      word-break:break-word;
-    }
-    .empty{color:#bbb}
-    @media(max-width:620px){
-      body{padding:14px}
-      .wrap{margin:20px auto}
-      .grid{grid-template-columns:1fr 1fr}
-      .year{grid-column:1/-1}
-      .result{grid-template-columns:1fr}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>西暦・和暦・年齢 変換</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;animation:none!important;transition:none!important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  padding:16px;
+  background:#fff;
+  color:#111;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic UI","Yu Gothic",sans-serif;
+}
+main{max-width:620px;margin:0 auto}
+h1{margin:0 0 18px;font-size:22px;line-height:1.3}
+.row{display:grid;grid-template-columns:1fr 76px 76px;gap:8px}
+label{display:block;margin:0 0 5px;font-size:12px;color:#666}
+input{
+  width:100%;
+  height:44px;
+  margin:0;
+  padding:0 10px;
+  border:1px solid #bbb;
+  border-radius:6px;
+  background:#fff;
+  color:#111;
+  font:inherit;
+  font-size:16px;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+  touch-action:manipulation;
+}
+input:focus{border-color:#f07822}
+.note{margin:9px 0 0;font-size:12px;color:#777;line-height:1.45}
+#error{min-height:18px;margin-top:5px;font-size:12px;color:#c00}
+.results{margin-top:14px;border-top:1px solid #ddd}
+.result{
+  display:grid;
+  grid-template-columns:76px 1fr;
+  align-items:center;
+  min-height:52px;
+  border-bottom:1px solid #ddd
+}
+.result b{font-size:12px;color:#666}
+.result span{font-size:22px;font-weight:700;word-break:break-word}
+.empty{color:#bbb}
+@media(max-width:520px){
+  body{padding:12px}
+  h1{font-size:20px}
+  .row{grid-template-columns:1fr 70px 70px}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>西暦・和暦・年齢 変換</h1>
+<main>
+  <h1>西暦・和暦・年齢 変換</h1>
 
-    <div class="card">
-      <div class="grid">
-        <div class="year">
-          <label for="year">年</label>
-          <input id="year" placeholder="1988 / 平成30 / H30 / R2">
-        </div>
-        <div>
-          <label for="month">月</label>
-          <input id="month" inputmode="numeric" placeholder="任意">
-        </div>
-        <div>
-          <label for="day">日</label>
-          <input id="day" inputmode="numeric" placeholder="任意">
-        </div>
-      </div>
-
-      <div class="note">
-        西暦でも和暦でも同じ「年」欄に入力できます。月・日まで入れると年齢も計算します。
-      </div>
-      <div id="error" class="error"></div>
-
-      <div class="result">
-        <div class="box">
-          <div class="name">西暦</div>
-          <div id="western" class="value empty">—</div>
-        </div>
-        <div class="box">
-          <div class="name">和暦</div>
-          <div id="era" class="value empty">—</div>
-        </div>
-        <div class="box">
-          <div class="name">年齢</div>
-          <div id="age" class="value empty">—</div>
-        </div>
-      </div>
+  <div class="row">
+    <div>
+      <label for="year">年</label>
+      <input id="year" autocomplete="off" autocapitalize="off" spellcheck="false"
+             placeholder="1988 / 平成30 / H30 / R2">
+    </div>
+    <div>
+      <label for="month">月</label>
+      <input id="month" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="任意">
+    </div>
+    <div>
+      <label for="day">日</label>
+      <input id="day" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="任意">
     </div>
   </div>
 
+  <div class="note">年は西暦・和暦どちらでも入力可。月・日まで入れると年齢も表示。</div>
+  <div id="error"></div>
+
+  <div class="results">
+    <div class="result"><b>西暦</b><span id="western" class="empty">—</span></div>
+    <div class="result"><b>和暦</b><span id="era" class="empty">—</span></div>
+    <div class="result"><b>年齢</b><span id="age" class="empty">—</span></div>
+  </div>
+</main>
+
 <script>
-const eras = [
-  {name:"令和", code:"R", start:[2019,5,1], base:2018, max:null},
-  {name:"平成", code:"H", start:[1989,1,8], base:1988, max:31},
-  {name:"昭和", code:"S", start:[1926,12,25], base:1925, max:64},
-  {name:"大正", code:"T", start:[1912,7,30], base:1911, max:15},
-  {name:"明治", code:"M", start:[1868,1,25], base:1867, max:45}
+"use strict";
+
+const Y=document.getElementById("year"),
+      M=document.getElementById("month"),
+      D=document.getElementById("day"),
+      W=document.getElementById("western"),
+      E=document.getElementById("era"),
+      A=document.getElementById("age"),
+      X=document.getElementById("error");
+
+const ERAS=[
+  ["令和","R",2019,5,1,2018,0],
+  ["平成","H",1989,1,8,1988,31],
+  ["昭和","S",1926,12,25,1925,64],
+  ["大正","T",1912,7,30,1911,15],
+  ["明治","M",1868,1,25,1867,45]
 ];
 
-const yearEl = document.getElementById("year");
-const monthEl = document.getElementById("month");
-const dayEl = document.getElementById("day");
-const westernEl = document.getElementById("western");
-const eraEl = document.getElementById("era");
-const ageEl = document.getElementById("age");
-const errorEl = document.getElementById("error");
-
-function norm(v){
-  return v.trim()
-    .replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
-    .replace(/[ｒＲ]/g,"R").replace(/[ｈＨ]/g,"H")
-    .replace(/[ｓＳ]/g,"S").replace(/[ｔＴ]/g,"T")
-    .replace(/[ｍＭ]/g,"M").replace(/\s+/g,"");
+function norm(s){
+  return s.trim()
+    .replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248))
+    .replace(/[Ｒｒ]/g,"R").replace(/[Ｈｈ]/g,"H")
+    .replace(/[Ｓｓ]/g,"S").replace(/[Ｔｔ]/g,"T")
+    .replace(/[Ｍｍ]/g,"M").replace(/\s/g,"");
 }
+function parseYear(s){
+  s=norm(s);
+  if(!s)return null;
 
-function parseYear(v){
-  const s = norm(v);
-  if(!s) return {empty:true};
+  let m=s.match(/^(\d{3,4})年?$/);
+  if(m)return +m[1];
 
-  let m = s.match(/^(\d{3,4})年?$/);
-  if(m) return {year:Number(m[1])};
-
-  for(const e of eras){
-    const p1 = new RegExp(`^${e.name}(元|\\d{1,2})年?$`);
-    const p2 = new RegExp(`^${e.code}(元|\\d{1,2})年?$`,"i");
-    m = s.match(p1) || s.match(p2);
+  for(let i=0;i<ERAS.length;i++){
+    const e=ERAS[i];
+    m=s.match(new RegExp("^(?:"+e[0]+"|"+e[1]+")(元|\\d{1,2})年?$","i"));
     if(m){
-      const n = m[1]==="元" ? 1 : Number(m[1]);
-      if(n<1 || (e.max && n>e.max)) return {error:`${e.name}の年数を確認してください`};
-      return {year:e.base+n};
+      const n=m[1]==="元"?1:+m[1];
+      if(n<1||(e[6]&&n>e[6]))return NaN;
+      return e[5]+n;
     }
   }
-  return {error:"入力例：1988 / 平成30 / H30 / R2"};
+  return NaN;
 }
-
-function cmp(a,b){
-  return a[0]*10000+a[1]*100+a[2] - (b[0]*10000+b[1]*100+b[2]);
-}
-
-function eraForDate(y,m,d){
-  const t=[y,m,d];
-  return eras.find(e=>cmp(t,e.start)>=0) || null;
-}
-
-function eraName(e,y){
-  const n=y-e.base;
-  return `${e.name}${n===1?"元":n}年`;
-}
-
-function eraForYear(y){
-  if(y===2019) return "平成31年 / 令和元年";
-  if(y===1989) return "昭和64年 / 平成元年";
-  if(y===1926) return "大正15年 / 昭和元年";
-  if(y===1912) return "明治45年 / 大正元年";
-  if(y>=2020) return `令和${y-2018}年`;
-  if(y>=1990) return `平成${y-1988}年`;
-  if(y>=1927) return `昭和${y-1925}年`;
-  if(y>=1913) return `大正${y-1911}年`;
-  if(y>=1868) return `明治${y-1867}年`;
+function eraText(y){
+  if(y===2019)return "平成31年 / 令和元年";
+  if(y===1989)return "昭和64年 / 平成元年";
+  if(y===1926)return "大正15年 / 昭和元年";
+  if(y===1912)return "明治45年 / 大正元年";
+  if(y>=2020)return "令和"+(y-2018)+"年";
+  if(y>=1990)return "平成"+(y-1988)+"年";
+  if(y>=1927)return "昭和"+(y-1925)+"年";
+  if(y>=1913)return "大正"+(y-1911)+"年";
+  if(y>=1868)return "明治"+(y-1867)+"年";
   return "対象外";
 }
-
-function validDate(y,m,d){
-  const dt=new Date(y,m-1,d);
-  return dt.getFullYear()===y && dt.getMonth()===m-1 && dt.getDate()===d;
+function eraByDate(y,m,d){
+  const n=y*10000+m*100+d;
+  for(let i=0;i<ERAS.length;i++){
+    const e=ERAS[i], start=e[2]*10000+e[3]*100+e[4];
+    if(n>=start){
+      const k=y-e[5];
+      return e[0]+(k===1?"元":k)+"年";
+    }
+  }
+  return "対象外";
 }
-
-function age(y,m,d){
-  const now=new Date();
-  const birth=new Date(y,m-1,d);
-  if(birth>now) return null;
+function validDate(y,m,d){
+  const t=new Date(y,m-1,d);
+  return t.getFullYear()===y&&t.getMonth()===m-1&&t.getDate()===d;
+}
+function ageNow(y,m,d){
+  const now=new Date(), b=new Date(y,m-1,d);
+  if(b>now)return null;
   let a=now.getFullYear()-y;
-  if(now.getMonth()+1<m || (now.getMonth()+1===m && now.getDate()<d)) a--;
+  const nm=now.getMonth()+1, nd=now.getDate();
+  if(nm<m||(nm===m&&nd<d))a--;
   return a;
 }
-
-function set(el,text,empty=false){
-  el.textContent=text;
-  el.classList.toggle("empty",empty);
+function set(el,v,empty){
+  el.textContent=v;
+  el.className=empty?"empty":"";
 }
-
 function update(){
-  errorEl.textContent="";
-  const p=parseYear(yearEl.value);
+  X.textContent="";
+  const y=parseYear(Y.value);
 
-  if(p.empty){
-    set(westernEl,"—",true); set(eraEl,"—",true); set(ageEl,"—",true);
+  if(y===null){
+    set(W,"—",1); set(E,"—",1); set(A,"—",1);
     return;
   }
-  if(p.error){
-    errorEl.textContent=p.error;
-    set(westernEl,"—",true); set(eraEl,"—",true); set(ageEl,"—",true);
-    return;
-  }
-
-  const y=p.year;
-  set(westernEl,`${y}年`);
-  const ms=norm(monthEl.value), ds=norm(dayEl.value);
-
-  if(!ms && !ds){
-    set(eraEl,eraForYear(y));
-    set(ageEl,"—",true);
+  if(!Number.isFinite(y)||y<1868){
+    X.textContent="入力を確認してください";
+    set(W,"—",1); set(E,"—",1); set(A,"—",1);
     return;
   }
 
-  if(!ms || !ds){
-    errorEl.textContent="月・日は両方入力してください";
-    set(eraEl,eraForYear(y));
-    set(ageEl,"—",true);
+  set(W,y+"年",0);
+
+  const ms=norm(M.value), ds=norm(D.value);
+  if(!ms&&!ds){
+    set(E,eraText(y),0); set(A,"—",1);
+    return;
+  }
+  if(!ms||!ds){
+    X.textContent="月・日は両方入力してください";
+    set(E,eraText(y),0); set(A,"—",1);
     return;
   }
 
-  const m=Number(ms), d=Number(ds);
+  const m=+ms,d=+ds;
   if(!validDate(y,m,d)){
-    errorEl.textContent="月・日を確認してください";
-    set(eraEl,eraForYear(y));
-    set(ageEl,"—",true);
+    X.textContent="月・日を確認してください";
+    set(E,eraText(y),0); set(A,"—",1);
     return;
   }
 
-  const e=eraForDate(y,m,d);
-  set(eraEl,e ? eraName(e,y) : "対象外");
-
-  const a=age(y,m,d);
-  set(ageEl,a===null ? "未来" : `${a}歳`);
+  set(E,eraByDate(y,m,d),0);
+  const a=ageNow(y,m,d);
+  set(A,a===null?"未来":a+"歳",0);
 }
 
-[yearEl,monthEl,dayEl].forEach(el=>el.addEventListener("input",update));
+Y.addEventListener("input",update,{passive:true});
+M.addEventListener("input",update,{passive:true});
+D.addEventListener("input",update,{passive:true});
 update();
 </script>
 </body>
